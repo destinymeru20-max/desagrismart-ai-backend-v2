@@ -1,11 +1,2 @@
-{
-  "name": "desagrismart-ai-backend-v2",
-  "type": "module",
-  "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "openai": "^4.0.0"
-  }
-}
+app.get("/api", (req, res) => {
+res.json({ message: "DesagriSmart AI API running"
