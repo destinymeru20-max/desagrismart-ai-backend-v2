@@ -10,22 +10,11 @@ app.use(express.json({ limit: "20kb" }));
 
 const PORT = process.env.PORT || 10000;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 app.get("/", (req, res) => {
   res.json({
     name: "DesagriSmart AI",
     status: "live",
     message: "Agricultural AI backend is running."
-  });
-});
-
-app.get("/api", (req, res) => {
-  res.json({
-    status: "live",
-    ai: "OpenAI integration configured"
   });
 });
 
@@ -47,67 +36,65 @@ app.post("/api/ask", async (req, res) => {
 
     if (!process.env.OPENAI_API_KEY) {
       return res.status(503).json({
-        error: "AI service is not configured yet."
+        error: "AI service is not configured."
       });
     }
 
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
     const response = await openai.responses.create({
       model: "gpt-4.1-mini",
-
       instructions: `
-You are DesagriSmart AI, an agricultural assistant.
+You are DesagriSmart AI, an agricultural assistant
+helping farmers in Nigeria and worldwide.
 
-Your mission is to help farmers in Nigeria and worldwide.
+You specialize in crop production, livestock,
+fishery, soil science, plant diseases, agricultural
+research, farm business, weather and education.
 
-You specialize in:
-1. Crop Intelligence
-2. Livestock Intelligence
-3. Fishery Intelligence
-4. Soil Science
-5. Plant Disease Research
-6. Agricultural Research
-7. Farm Business Management
-8. Weather and Climate
-9. Agricultural Education
-
-Give clear, practical and accurate agricultural answers.
-
+Give practical, accurate answers in simple language.
 Use Nigerian farming examples when relevant.
-Explain difficult agricultural terms simply.
-Never invent weather forecasts, market prices or research findings.
-Ask for the farmer's location when location matters.
+Never invent weather forecasts or market prices.
 Explain uncertainty when information is incomplete.
-For serious animal diseases or crop emergencies,
-recommend consulting a qualified agricultural professional.
-
-Answer in a friendly, organized and helpful way.
+Recommend qualified agricultural professionals
+for serious crop or animal health problems.
 `,
-
       input: `
-Agriculture department: ${department || "General Agriculture"}
+Department: ${department || "General Agriculture"}
 
 Farmer's question:
 ${question.trim()}
 `
     });
-  } catch (error) {
-    console.error("AI request failed:", {
-      message: error.message,
-      status: error.status,
-      code: error.code,
-      type: error.type
-    });
 
-    res.status(500).json({
-      error: "AI request failed. Please check the Render application logs."
-    });
-  }
-    
+    const answer = response.output_text;
+
+    if (!answer) {
+      throw new Error("The AI returned an empty answer.");
+    }
 
     res.json({
       success: true,
       department: department || "General Agriculture",
-      answer: response.output_text
+      answer
     });
 
-  
+  } catch (error) {
+    console.error("AI request failed:", {
+      message: error.message,
+      status: error.status,
+      code: error.code
+    });
+
+    res.status(500).json({
+      error: "AI request failed. Please check the backend logs."
+    });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log("DesagriSmart AI server running on port " + PORT);
+});
+    
