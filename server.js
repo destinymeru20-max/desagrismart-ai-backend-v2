@@ -90,6 +90,19 @@ Farmer's question:
 ${question.trim()}
 `
     });
+  } catch (error) {
+    console.error("AI request failed:", {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      type: error.type
+    });
+
+    res.status(500).json({
+      error: "AI request failed. Please check the Render application logs."
+    });
+  }
+    
 
     res.json({
       success: true,
@@ -97,16 +110,4 @@ ${question.trim()}
       answer: response.output_text
     });
 
-  } catch (error) {
-    console.error("AI request failed:", error.message);
-
-    res.status(500).json({
-      error: "DesagriSmart AI could not process your question. Please try again."
-    });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log("DesagriSmart AI server running on port " + PORT);
-});
-      
+  
